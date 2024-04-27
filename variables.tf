@@ -5,7 +5,7 @@ EC2 instance. These values in our Terraform code are used to create and configur
 variable "ami" {
   description = "ami of ec2 instance"
   type        = string
-  default     = "ami-0715c1897453cabd1"
+  default     = "ami-04e5276ebb8451442"
 }
 
 # Launch Template and ASG Variables
@@ -14,6 +14,21 @@ variable "instance_type" {
   type        = string
   default     = "t2.micro"
 }
+
+variable "ami_filter" {
+  description = "Name filter and owner for AMI"   
+
+  type = object ({
+    name  = string
+    owner = string
+  })
+
+  default = {
+  name  = "al2023-ami-2023.4.20240416.0-kernel-6.1-x86_64"
+  owner = "137112412989"
+  }
+}
+
 
 
 #This user data variable indicates that the script configures Apache on a server.

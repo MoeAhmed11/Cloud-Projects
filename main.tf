@@ -224,7 +224,7 @@ resource "aws_route_table_association" "private_rt_assoc" {
 /*This will ensure that instances in the public subnet can access the internet, and instances in the 
 private subnet can only access resources within the VPC.*/
 
-########################################################
+/*########################################################
 # Lookup Ubunut AMI Image
 data "aws_ami" "ubuntu" {
   most_recent = true
@@ -239,8 +239,23 @@ data "aws_ami" "ubuntu" {
   #owners = ["Jason Li"]
 }
 ######################################################
+*/
+data "aws_ami" "app_ami" {
+  most_recent = true
 
+  filter {
+    name   = "name"
+    values = [var.ami_filter.name]
+  }
 
+  filter {
+    name   = "virtualization-type"
+    values = ["hvm"]
+  }
+
+  owners = [var.ami_filter.owner]
+}
+/*
 # Launch Template and ASG Resources
 resource "aws_launch_template" "launch_template" {
   name          = "${var.environment}-launch-template"
@@ -258,6 +273,23 @@ resource "aws_launch_template" "launch_template" {
   }
   user_data = base64encode("${var.ec2_user_data}")
 }
+*/
 
+resource "aws_launch_template" "launch_template" {
+  name          = "${var.environment}-launch-template"
+  image_id      = data.aws_ami.ubuntu.id
+  instance_type = var.instance_type
+  network_interfaces {
+    device_index    = 0
+    security_groups = [aws_security_group.asg_security_group.id]
+  }
+  tag_specifications {
+    resource_type = "instance"
+    tags = {
+      Name = "${var.environment}-asg-ec2"
+    }
+  }
+  user_data = base64encode("${var.ec2_user_data}")
+}
 
 
