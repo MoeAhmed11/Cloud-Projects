@@ -20,14 +20,14 @@ variable "instance_type" {
 variable "ec2_user_data" {
   description = "variable indicates that the script configures Apache on a server"
   type        = string
-  default     = "<<EOF
+  default     = <<EOF
 #!/bin/bash
 yum update -y
 yum install -y httpd
 systemctl start httpd
 systemctl enable httpd
 echo "<h1>Hello World from $(hostname -f)</h1>" > /var/www/html/index.html
-EOF"
+EOF
 }
 
 
