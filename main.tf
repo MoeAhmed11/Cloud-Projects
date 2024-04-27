@@ -277,7 +277,7 @@ resource "aws_launch_template" "launch_template" {
 
 resource "aws_launch_template" "launch_template" {
   name          = "${var.environment}-launch-template"
-  image_id      = data.ami_filter.ami.default
+  image_id      = data.app_ami.name
   instance_type = var.instance_type
   network_interfaces {
     device_index    = 0
