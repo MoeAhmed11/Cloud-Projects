@@ -236,8 +236,10 @@ data "aws_ami" "ubuntu" {
     name   = "virtualization-type"
     values = ["hvm"]
   }
-  owners = ["Jason Li"]
+  #owners = ["Jason Li"]
 }
+######################################################
+
 
 # Launch Template and ASG Resources
 resource "aws_launch_template" "launch_template" {
@@ -256,7 +258,6 @@ resource "aws_launch_template" "launch_template" {
   }
   user_data = base64encode("${var.ec2_user_data}")
 }
-######################################################
 
 
 
