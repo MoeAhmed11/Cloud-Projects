@@ -31,7 +31,6 @@ EOF
 }
 
 
-
 /*This VPC can then be used to deploy resources that need to be accessible from the internet or from other resources in the VPC.
 This variable defines the CIDR block for the VPC. The default value is 10.0.0.0/16.
 */
