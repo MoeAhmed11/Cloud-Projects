@@ -60,7 +60,7 @@ variable "private_subnet_cidr" {
 variable "environment" {
   description = "Environment name for deployment"
   type        = string
-  default     = "Terraform_tutorial"
+  default     = "Terraform-tutorial"
 }
 
 # This is a Region Variable
