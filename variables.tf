@@ -5,7 +5,7 @@ EC2 instance. These values in our Terraform code are used to create and configur
 variable "ami" {
   description = "ami of ec2 instance"
   type        = string
-  default     = "ami-04e5276ebb8451442"
+  default     = "ami-0715c1897453cabd1"
 }
 
 # Launch Template and ASG Variables
@@ -60,7 +60,7 @@ variable "private_subnet_cidr" {
 variable "environment" {
   description = "Environment name for deployment"
   type        = string
-  default     = "Terraform tutorial"
+  default     = "Terraform_tutorial"
 }
 
 # This is a Region Variable
