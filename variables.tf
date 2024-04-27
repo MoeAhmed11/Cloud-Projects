@@ -1,6 +1,4 @@
 #variables.tf
-
-
 /*EC2 variables can be used to store values such as the AMI ID, instance type, and VPC ID of an 
 EC2 instance. These values in our Terraform code are used to create and configure EC2 instances. */
 
