@@ -93,6 +93,13 @@ resource "aws_route_table" "public_route_table" {
   }
 }
 
+#public subnet will be associated with the public route table
+resource "aws_route_table_association" "public_rt_assoc" {
+  count          = 2
+  subnet_id      = aws_subnet.public_subnet[count.index].id
+  route_table_id = aws_route_table.public_route_table.id
+}
+
 #Elastic IP 
 /*An EIP is a public IP address that can be assigned to an instance or load balancer. EIPs can be used to make your instances accessible from the internet.*/
 /* resource "aws_eip" "elastic_ip" {
@@ -103,8 +110,6 @@ resource "aws_route_table" "public_route_table" {
  */
 
 # Application Load Balancer Resources
-/*Creates an Application Load Balancer (ALB) that is accessible from the internet, uses the application load balancer 
-type, and uses the ALB security group. The ALB will be created in all public subnets.*/
 resource "aws_lb" "alb" {
   name               = "${var.environment}-alb"
   internal           = false
@@ -125,8 +130,7 @@ resource "aws_lb_target_group" "target_group" {
   }
 }
 
-/*Creating a listener that listens on port 80 and uses the HTTP protocol. The listener will be associated 
-with the application load balancer*/
+#Create a linstener for HTTP using port 80, attached to the ALB
 resource "aws_lb_listener" "alb_listener" {
   load_balancer_arn = aws_lb.alb.arn
   port              = "80"
@@ -140,6 +144,7 @@ resource "aws_lb_listener" "alb_listener" {
   }
 }
 
+#Create an Auto Scaling Group, specifying the capacity, target group and launch template
 resource "aws_autoscaling_group" "auto_scaling_group" {
   name = "my-autoscaling-group"
   desired_capacity = 1
@@ -157,13 +162,7 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   }
 }
 
-#public subnet will be associated with the public route table
-resource "aws_route_table_association" "public_rt_assoc" {
-  count          = 2
-  subnet_id      = aws_subnet.public_subnet[count.index].id
-  route_table_id = aws_route_table.public_route_table.id
-}
-
+#Data source to get the latest Amazon Linux 2 AMI
 data "aws_ami" "app_ami" {
   most_recent = true
 
@@ -180,6 +179,7 @@ data "aws_ami" "app_ami" {
   owners = [var.ami_filter.owner]
 }
 
+#Create a launch template to launch instances on the ASG
 resource "aws_launch_template" "launch_template" {
   name          = "${var.environment}-launch-template"
   image_id      = data.aws_ami.app_ami.id
