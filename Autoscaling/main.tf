@@ -13,7 +13,7 @@ data "aws_availability_zones" "available" {
 }
 
 
-# Security Group Resources
+# Security Group for ALB allowing requests from any IP address
 resource "aws_security_group" "alb_security_group" {
   name        = "${var.environment}-alb-security-group"
   description = "ALB Security Group"
@@ -35,6 +35,9 @@ resource "aws_security_group" "alb_security_group" {
     Name = "${var.environment}-alb-security-group"
   }
 }
+
+
+# Security Group for ASG allowing requests only from ALB
 resource "aws_security_group" "asg_security_group" {
   name        = "${var.environment}-asg-security-group"
   description = "ASG Security Group"
@@ -58,8 +61,7 @@ resource "aws_security_group" "asg_security_group" {
 }
 
 
-#Internet Gateway
-
+#Internet Gateway to enable internet connectivity 
 resource "aws_internet_gateway" "internet_gateway" {
   vpc_id = aws_vpc.vpc.id
   tags = {
@@ -67,7 +69,7 @@ resource "aws_internet_gateway" "internet_gateway" {
   }
 }
 
-#2Public Subnets
+#Create 2 Public Subnets
 resource "aws_subnet" "public_subnet" {
   count                   = 2
   vpc_id                  = aws_vpc.vpc.id
@@ -79,9 +81,7 @@ resource "aws_subnet" "public_subnet" {
   }
 }
 
-
-/*Route table for public subnets, this ensures that all instances launched in 
-public subnet will have access to the internet*/
+#Route table for public subnets, this ensures that all instances launched in  public subnet will have access to the internet
 resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.vpc.id
   route {
@@ -94,13 +94,13 @@ resource "aws_route_table" "public_route_table" {
 }
 
 #Elastic IP 
-/*An EIP is a public IP address that can be assigned to an instance or load balancer. EIPs can be used to 
-make your instances accessible from the internet.*/
-resource "aws_eip" "elastic_ip" {
+/*An EIP is a public IP address that can be assigned to an instance or load balancer. EIPs can be used to make your instances accessible from the internet.*/
+/* resource "aws_eip" "elastic_ip" {
   tags = {
     Name = "${var.environment}-elastic-ip"
   }
 }
+ */
 
 # Application Load Balancer Resources
 /*Creates an Application Load Balancer (ALB) that is accessible from the internet, uses the application load balancer 
