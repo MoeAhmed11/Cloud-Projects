@@ -1,5 +1,4 @@
 # Terraform Resources
-
 #Create a new VPC in AWS
 resource "aws_vpc" "vpc" {
   cidr_block = var.vpc_cidr
@@ -68,11 +67,6 @@ resource "aws_internet_gateway" "internet_gateway" {
   }
 }
 
-#Creating 4Subnets, 2Private, 2public
-/*The public subnet will have a public IP address assigned to each instance that is launched in it, while 
-the private subnet will not. This allows you to control which instances are accessible from the 
-internet and which are not.*/
-
 #2Public Subnets
 resource "aws_subnet" "public_subnet" {
   count                   = 2
@@ -84,18 +78,7 @@ resource "aws_subnet" "public_subnet" {
     Name = join("-", ["${var.environment}-public-subnet", data.aws_availability_zones.available.names[count.index]])
   }
 }
-/*
-#2Private Subnets
-resource "aws_subnet" "private_subnet" {
-  count             = 2
-  vpc_id            = aws_vpc.vpc.id
-  cidr_block        = var.private_subnet_cidr[count.index]
-  availability_zone = data.aws_availability_zones.available.names[count.index]
-  tags = {
-    Name = join("-", ["${var.environment}-private-subnet", data.aws_availability_zones.available.names[count.index]])
-  }
-}
-*/
+
 
 /*Route table for public subnets, this ensures that all instances launched in 
 public subnet will have access to the internet*/
@@ -118,23 +101,6 @@ resource "aws_eip" "elastic_ip" {
     Name = "${var.environment}-elastic-ip"
   }
 }
-
-
-#AWS NAT Gateway:  
-/*#is a network device that allows instances in a private subnet to access the internet. 
-#It does this by translating the private IP addresses of the instances to public IP addresses.*/
-/*
-resource "aws_nat_gateway" "nat_gateway" {
-  allocation_id = aws_eip.elastic_ip.id
-  subnet_id     = aws_subnet.public_subnet[0].id
-  depends_on    = [aws_internet_gateway.internet_gateway]
-  tags = {
-    Name = "Terraform2023InternetGateway"
-  }
-}
-*/
-
-
 
 # Application Load Balancer Resources
 /*Creates an Application Load Balancer (ALB) that is accessible from the internet, uses the application load balancer 
@@ -159,8 +125,6 @@ resource "aws_lb_target_group" "target_group" {
   }
 }
 
-#Application Load Balancer: Is a powerful tool that can help you improve the performance, security, and 
-#availability of your applications
 /*Creating a listener that listens on port 80 and uses the HTTP protocol. The listener will be associated 
 with the application load balancer*/
 resource "aws_lb_listener" "alb_listener" {
@@ -176,10 +140,6 @@ resource "aws_lb_listener" "alb_listener" {
   }
 }
 
-#AutoScalingGroup 
-/*if the number of requests to the target groups increases, the Auto Scaling group will automatically scale the number 
-of instances in the group up to handle the increased load. If the number of requests to the target groups decreases, 
-the Auto Scaling group will automatically scale the number of instances in the group down to save costs.*/
 resource "aws_autoscaling_group" "auto_scaling_group" {
   name = "my-autoscaling-group"
   desired_capacity = 1
@@ -197,24 +157,6 @@ resource "aws_autoscaling_group" "auto_scaling_group" {
   }
 }
 
-
-#AWS Route-Table:  A route table is a collection of routes that determines how traffic is routed within a VPC. 
-/*In this case, the route table will route all traffic to the NAT gateway, which will then forward the traffic 
-to the internet.*/
-/*
-resource "aws_route_table" "private_route_table" {
-  vpc_id = aws_vpc.vpc.id
-  route {
-    cidr_block     = "0.0.0.0/0"
-    nat_gateway_id = aws_nat_gateway.nat_gateway.id
-  }
-  tags = {
-    Name = "${var.environment}-private-route-table"
-  }
-}
-*/
-
-#Create two route table associations, one for the public subnet and one for the private subnet.
 #public subnet will be associated with the public route table
 resource "aws_route_table_association" "public_rt_assoc" {
   count          = 2
@@ -222,34 +164,6 @@ resource "aws_route_table_association" "public_rt_assoc" {
   route_table_id = aws_route_table.public_route_table.id
 }
 
-/*
-#Private subnet will be associated with the private route table
-resource "aws_route_table_association" "private_rt_assoc" {
-  count          = 2
-  subnet_id      = aws_subnet.private_subnet[count.index].id
-  route_table_id = aws_route_table.private_route_table.id
-}
-*/
-
-/*This will ensure that instances in the public subnet can access the internet, and instances in the 
-private subnet can only access resources within the VPC.*/
-
-/*########################################################
-# Lookup Ubunut AMI Image
-data "aws_ami" "ubuntu" {
-  most_recent = true
-  filter {
-    name   = "name"
-    values = ["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-*"]
-  }
-  filter {
-    name   = "virtualization-type"
-    values = ["hvm"]
-  }
-  #owners = ["Jason Li"]
-}
-######################################################
-*/
 data "aws_ami" "app_ami" {
   most_recent = true
 
@@ -265,25 +179,6 @@ data "aws_ami" "app_ami" {
 
   owners = [var.ami_filter.owner]
 }
-/*
-# Launch Template and ASG Resources
-resource "aws_launch_template" "launch_template" {
-  name          = "${var.environment}-launch-template"
-  image_id      = data.aws_ami.ubuntu.id
-  instance_type = var.instance_type
-  network_interfaces {
-    device_index    = 0
-    security_groups = [aws_security_group.asg_security_group.id]
-  }
-  tag_specifications {
-    resource_type = "instance"
-    tags = {
-      Name = "${var.environment}-asg-ec2"
-    }
-  }
-  user_data = base64encode("${var.ec2_user_data}")
-}
-*/
 
 resource "aws_launch_template" "launch_template" {
   name          = "${var.environment}-launch-template"

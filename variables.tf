@@ -64,18 +64,11 @@ variable "public_subnet_cidr" {
   default     = ["10.10.0.0/24", "10.10.2.0/24"]
 }
 
-#These Private subnets can be used to deploy resources that do not need to be accessible from the internet.
-variable "private_subnet_cidr" {
-  description = "Private Subnet cidr block"
-  type        = list(string)
-  default     = ["10.10.3.0/24", "10.10.4.0/24"]
-}
-
 #This is a Environement variable 
 variable "environment" {
   description = "Environment name for deployment"
   type        = string
-  default     = "Terraform-tutorial"
+  default     = "ASG-Terraform"
 }
 
 # This is a Region Variable
